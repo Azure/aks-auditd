@@ -1,14 +1,41 @@
-# Project
+# Overview
+*aks-auditd* provides you with an easy and highly configurable way to gain visibility into your AKS worker node and container kernel level activity. If you are running a multi-tenant cluster, having visibility into your AKS worker node activity is critical and the Kubernetes API server logs aren't always be enough. [`auditd`](https://linux.die.net/man/8/auditd) provides a good solution to this. 
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+By default, *aks-auditd* configures your `auditd` logging, using syslog as the default event forwarder to send `auditd` logs to your Log Analytics workspace. It uses a lightweight container deployed as a `Daemonset`, to setup and configure your `auditd` and `oms` rules. This container has two primary functions:
+* Install `auditd` onto the VMSS.
+* Configure audit rules and apply any changes made to your audit configuration. Each type of audit configuration (`oms` and `auditd`) has it's own `ConfigMap`.
 
-As the maintainer of this project, please make a few updates:
+At a high-level, *aks-auditd* enables and configures the following pipeline:
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+![AKS Audit Logging Pipeline](https://user-images.githubusercontent.com/43414276/166338930-2c19291b-f273-4d47-9dab-a36cc0359faa.png)
+
+
+# Usage
+## Enable the OMSAgent (auoms)
+Before deploying the DaemonSet, you must first enable the OMSAgent (auoms) on your AKS cluster to ensure the OMSAgent sends the telemetry to your Log Analytics workspace.
+
+```
+az vmss extension set --resource-group MC_aks-simuland_aks-simuland_northeurope --vmss-name aks-agentpool-49591645-vmss --name OmsAgentForLinux --publisher Microsoft.EnterpriseCloud.Monitoring --protected-settings '{\"workspaceKey\":\"...\"}' --settings '{\"workspaceId\":\"d421160f-40fa-4fbf-a198-780c7c881408\",\"skipDockerProviderInstall\":true}'
+
+```
+
+## Specify your Log Analytics Workspace (if needed)
+ Update the `LOG_ANALYTICS_WORKSPACE_ID` environment variable within `daemonset.yaml` to specify your [Log Analytics workspace ID](https://docs.microsoft.com/en-us/bonsai/cookbook/get-law-id).
+
+## Configure additional auditd and auoms logging
+Update the following ConfigMaps to update your `auditd` and `oms` configuration.
+
+### audisp-plugins
+These correspond to audisp/plugins.d/ files and are intended to be used to send audit logs to remote systems. By default, we use Syslog as the event forwarder.
+
+### auditd-rule
+These configuration files are placed in your worker node's /etc/audit/rules.d/ and determine what the audit daemon will record and send to your remote server (Syslog by default). By default, `aks-auditd` creates a ruleset for auditing process execution on your VMSS and pods ([`10-procmon.rules`](https://secopsmonkey.com/monitoring-process-execution-with-auditd.html)).
+
+### oms-config
+These configuration files are placed in your /etc/opt/microsoft/omsagent/<workspace id>/conf/omsagent.d/ and are used to configure the collection of events by the OMS agent on your host. By default teh OMS agent comes configured with syslog support. Available configurations can be found at https://github.com/microsoft/OMS-Agent-for-Linux/tree/master/installer/conf/omsagent.d. 
+
+
+
 
 ## Contributing
 
