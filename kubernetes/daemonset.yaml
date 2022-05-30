@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: aks-auditd
+  namespace: kube-system
+  labels:
+    name: aks-auditd
+spec:
+  selector:
+    matchLabels:
+      name: aks-auditd
+  template:
+    metadata:
+      labels:
+        name: aks-auditd
+    spec:
+      hostPID: true
+      containers:
+      - name: aks-auditd
+        image: ghcr.io/Azure/aks-auditd:latest
+        env:
+        - name:  LOG_ANALYTICS_WORKSPACE_ID
+          value: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # NOTE: Replace this with the workspace ID of your Log Analytics Workspace
+        volumeMounts:
+        - name: node
+          mountPath: /node
+          readOnly: false
+        - name: auditd-rules
+          mountPath: /audit-rules
+        - name: audisp-plugins
+          mountPath: /audisp-plugins
+        - name: oms-config
+          mountPath: /oms-config
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+      volumes:
+      - name: node
+        hostPath:
+          path: /
+      - name: auditd-rules
+        configMap:
+          name: auditd-rules
+      - name: audisp-plugins
+        configMap:
+          name: audisp-plugins
+      - name: oms-config
+        configMap:
+          name: oms-config
+    
+      
+
+  
+

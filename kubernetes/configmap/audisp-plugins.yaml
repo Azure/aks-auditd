@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audisp-plugins
+  namespace: kube-system
+  labels:
+    name: aks-auditd
+data:
+  # These correspond to audisp/plugins.d/ files and are intended to be used to send audit logs
+  # to remote systems. By default we use syslog as the event forwarder in this configuration.
+  syslog.conf: |
+    active = yes
+    direction = out
+    path = builtin_syslog
+    type = builtin
+    args = LOG_INFO
+    format = string
+
+  

@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-config
+  namespace: kube-system
+  labels:
+    name: aks-auditd
+data:  {} # NOTE: Remove this empty dictionary if you add files
+# These configuration files are placed in your /etc/opt/microsoft/omsagent/<workspace id>/conf/omsagent.d/
+# and are used to configure the collection of events by the OMS agent on your host. By default OMS agent
+# comes configured with syslog support. Available configurations can be found at https://github.com/microsoft/OMS-Agent-for-Linux/tree/master/installer/conf/omsagent.d.
+# We have shown an example configuration below.
+
+  # syslog.conf: |
+  #   <source>
+  #   type syslog
+  #   port %SYSLOG_PORT%
+  #   bind 127.0.0.1
+  #   protocol_type udp
+  #   tag oms.syslog
+  #   </source>
+
+  #   <filter oms.syslog.**>
+  #     type filter_syslog
+  #   </filter>
