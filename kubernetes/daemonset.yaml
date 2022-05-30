@@ -17,7 +17,7 @@ spec:
       hostPID: true
       containers:
       - name: aks-auditd
-        image: ghcr.io/Azure/aks-auditd:latest
+        image: ghcr.io/Azure/aks-auditd:main
         env:
         - name:  LOG_ANALYTICS_WORKSPACE_ID
           value: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # NOTE: Replace this with the workspace ID of your Log Analytics Workspace
